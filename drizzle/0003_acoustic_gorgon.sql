@@ -1,0 +1,1 @@
+CREATE INDEX `workspace_members_owner_email_idx` ON `workspace_members` (`owner_email`);

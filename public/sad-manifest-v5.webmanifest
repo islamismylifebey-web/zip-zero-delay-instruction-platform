@@ -1,0 +1,48 @@
+{
+  "name": "Speak. Assign. Done.",
+  "short_name": "Assign Done",
+  "description": "The simplest way to run a field team.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#F4F6F8",
+  "theme_color": "#0B5FFF",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Open Command Center",
+      "short_name": "Command",
+      "url": "/",
+      "icons": [{ "src": "/sad-royal-silver-v5-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "View Schedule",
+      "short_name": "Schedule",
+      "url": "/?view=schedule",
+      "icons": [{ "src": "/sad-royal-silver-v5-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/sad-royal-silver-v5-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/sad-royal-silver-v5-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/sad-royal-silver-v5-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

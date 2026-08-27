@@ -1,0 +1,1 @@
+ALTER TABLE `workspace_members` ADD `platform_role` text DEFAULT 'employee' NOT NULL;
