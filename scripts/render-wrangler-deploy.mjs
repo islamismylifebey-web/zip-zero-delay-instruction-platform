@@ -17,7 +17,7 @@ if (teamDomain.protocol !== 'https:') throw new Error('CLOUDFLARE_ACCESS_TEAM_DO
 const config = {
   $schema: 'node_modules/wrangler/config-schema.json',
   name: process.env.CLOUDFLARE_WORKER_NAME?.trim() || 'zip-zero-delay-backend',
-  main: 'dist/server/index.js',
+  main: '../dist/server/index.js',
   compatibility_date: '2026-09-06',
   compatibility_flags: ['nodejs_compat'],
   d1_databases: [{ binding: 'DB', database_name: process.env.CLOUDFLARE_D1_DATABASE_NAME.trim(), database_id: d1Id }],

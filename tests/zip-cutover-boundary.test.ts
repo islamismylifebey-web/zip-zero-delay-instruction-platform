@@ -48,3 +48,8 @@ test('JWT verification rejects unsigned or malformed tokens before trusting emai
   assert.equal(typeof access.verifyCloudflareAccessJwt, 'function');
   await assert.rejects(access.verifyCloudflareAccessJwt('not-a-jwt', { issuer: 'https://team.cloudflareaccess.com', audience: 'app-aud', fetch }));
 });
+test('wrangler deploy config points from .wrangler to the built worker artifact', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('../scripts/render-wrangler-deploy.mjs', import.meta.url), 'utf8');
+  assert.match(source, /main:\s*'\.\.\/dist\/server\/index\.js'/);
+});
