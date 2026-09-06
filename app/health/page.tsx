@@ -6,10 +6,12 @@ import { completedProcedures } from '@/lib/zip/onboarding.ts';
 import { loadKnowledge } from '@/lib/zip/onboarding-store.ts';
 import { getWorkspace, parseWorkspace, resolveAccess } from '@/lib/workspace-server';
 import HealthReviewButton from './health-client';
+import CutoverHealth from './cutover-health';
 
 export const dynamic = 'force-dynamic';
 const allowed = new Set<FeedbackSignal>(['clear', 'need_more_detail', 'wrong_location', 'not_trained']);
 export default async function HealthPage() {
+  if (process.env.VERCEL === '1' || process.env.ZIP_FRONTEND_ONLY === '1') return <CutoverHealth />;
   const user = await requireChatGPTUser('/health'); const access = await resolveAccess(user.email, user.displayName);
   if (access.role !== 'owner') return <main style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}><h1>ZIP knowledge health</h1><p>Only the company owner can review company knowledge health and employee feedback.</p><Link href="/">Return to ZIP</Link></main>;
   const row = await getWorkspace(access.ownerEmail); const snapshot = await loadKnowledge(getD1(), access.ownerEmail).catch(() => null);
