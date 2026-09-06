@@ -68,3 +68,12 @@ test('Vercel typechecking recognizes the Cloudflare worker module shim', async (
   assert.match(source, /declare module "cloudflare:workers"/);
   assert.match(source, /AnyD1Database/);
 });
+
+test('Vercel uses a frontend-only TypeScript scope', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const config = await readFile(new URL('../next.config.ts', import.meta.url), 'utf8');
+  const tsconfig = await readFile(new URL('../tsconfig.vercel.json', import.meta.url), 'utf8');
+  assert.match(config, /tsconfig\.vercel\.json/);
+  assert.match(tsconfig, /"worker"/);
+  assert.match(tsconfig, /"scripts"/);
+});
