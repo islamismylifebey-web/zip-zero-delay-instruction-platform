@@ -192,7 +192,7 @@ export default function WorkforceApp({ ownerName }: { ownerName: string }) {
     if (!viewer || viewer.role === "unassigned") return;
     const refresh = window.setInterval(() => {
       fetch("/api/workspace")
-        .then((response) => response.ok ? response.json() : Promise.reject(new Error("Sync failed")))
+        .then((response) => response.ok ? response.json() as Promise<{ workspace: { company?: CompanyProfile; jobs?: Job[]; crew?: CrewMember[]; mileage?: MileageEntry[] } | null; updatedAt?: string }> : Promise.reject(new Error("Sync failed")))
         .then(({ workspace, updatedAt }: { workspace: { company?: CompanyProfile; jobs?: Job[]; crew?: CrewMember[]; mileage?: MileageEntry[] } | null; updatedAt?: string }) => {
           if (!updatedAt || updatedAt === serverVersion.current || saveTimer.current) return;
           skipNextSave.current = true;

@@ -32,7 +32,7 @@ export default function ZipChat({ ownerName }: { ownerName: string }) {
   useEffect(() => {
     const controller = new AbortController();
     fetch('/api/workspace', { signal: controller.signal })
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('workspace')))
+      .then((response) => response.ok ? response.json() as Promise<{ workspace?: { crew?: CrewMember[] }; viewer: WorkspaceViewer }> : Promise.reject(new Error('workspace')))
       .then((payload: { workspace?: { crew?: CrewMember[] }; viewer: WorkspaceViewer }) => {
         if (controller.signal.aborted) return;
         const nextCrew = payload.workspace?.crew ?? []; setCrew(nextCrew); setViewer(payload.viewer);
