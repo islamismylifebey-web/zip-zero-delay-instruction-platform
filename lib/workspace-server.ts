@@ -1,8 +1,9 @@
 import { eq } from 'drizzle-orm';
 import type { CompanyProfile, CompanyRole, CrewMember, Job, MileageEntry, WorkspaceViewer } from '@/app/models';
-import { getDb } from '@/db';
+import { getDb, getD1 } from '@/db';
 import { workspaceMembers, workspaceStates } from '@/db/schema';
 import { stripRawInstructionFields } from '@/lib/zip/privacy.ts';
+import { writeWorkspaceSnapshot } from '@/lib/workspace-write.ts';
 
 export const MAX_WORKSPACE_BYTES = 5_000_000;
 export type WorkspaceData = { company: CompanyProfile; jobs: Job[]; crew: CrewMember[]; mileage: MileageEntry[] };
@@ -33,12 +34,12 @@ export async function resolveAccess(email: string, displayName: string): Promise
   return { role: 'unassigned', email: normalized, displayName, ownerEmail: '' };
 }
 export async function getWorkspace(ownerEmail: string) { const [row] = await getDb().select().from(workspaceStates).where(eq(workspaceStates.ownerEmail, ownerEmail)).limit(1); return row; }
-export async function saveWorkspace(ownerEmail: string, workspace: WorkspaceData) {
+export async function saveWorkspace(ownerEmail: string, workspace: WorkspaceData, expectedVersion: string | null) {
   const data = JSON.stringify(sanitizeWorkspace(workspace));
   if (new TextEncoder().encode(data).byteLength > MAX_WORKSPACE_BYTES) return { ok: false as const, response: Response.json({ error: 'Workspace is too large. Archive older completed work and try again.' }, { status: 413 }) };
-  const updatedAt = new Date().toISOString();
-  await getDb().insert(workspaceStates).values({ ownerEmail, data, updatedAt }).onConflictDoUpdate({ target: workspaceStates.ownerEmail, set: { data, updatedAt } });
-  return { ok: true as const, updatedAt };
+  const result = await writeWorkspaceSnapshot(getD1(), ownerEmail, data, expectedVersion);
+  if (!result.saved) return { ok: false as const, response: Response.json({ error: 'Workspace changed on another device. Refresh and retry.' }, { status: 409 }) };
+  return { ok: true as const, updatedAt: result.updatedAt };
 }
 export async function companyLogoKey(ownerEmail: string) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ownerEmail));

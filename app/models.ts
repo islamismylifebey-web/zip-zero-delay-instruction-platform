@@ -37,6 +37,7 @@ export type JobMessage = { id: string; sender: "dispatcher" | "worker"; text: st
 
 export type Job = {
   id: string;
+  zipDraftId?: string;
   assigneeId: string;
   task: string;
   location: string;

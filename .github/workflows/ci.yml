@@ -3,9 +3,15 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: zip-ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,4 +21,5 @@ jobs:
       - run: npm ci
       - run: npm run test:zip
       - run: npm test
+      - run: npx tsc --noEmit --pretty false
       - run: npm run lint

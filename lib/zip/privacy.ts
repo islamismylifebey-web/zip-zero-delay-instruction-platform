@@ -3,7 +3,9 @@ export function stripRawInstructionFields<T extends { jobs: unknown[] }>(workspa
     ...workspace,
     jobs: workspace.jobs.map((item) => {
       if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
-      const { sourceText: _discarded, rawInstruction: _rawInstruction, ...safe } = item as Record<string, unknown>;
+      const safe = { ...item } as Record<string, unknown>;
+      delete safe.sourceText;
+      delete safe.rawInstruction;
       return safe;
     }),
   } as T;
