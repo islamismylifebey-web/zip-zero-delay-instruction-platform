@@ -6,7 +6,7 @@ import type { CrewMember, WorkspaceViewer } from './models';
 import { ZIP_PRESETS } from '@/lib/zip/fixtures.ts';
 import { initialZipUiState, zipUiReducer } from '@/lib/zip/ui-state.ts';
 
-type SpeechRecognitionInstance = { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
+type SpeechRecognitionInstance = { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((event: { results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null };
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 type SpeechWindow = Window & { SpeechRecognition?: SpeechRecognitionConstructor; webkitSpeechRecognition?: SpeechRecognitionConstructor };
 
