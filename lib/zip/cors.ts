@@ -10,10 +10,14 @@ function allowedOrigins(configured: string): Set<string> {
   return origins;
 }
 
+export function isAllowedZipOrigin(origin: string | null, configured = process.env.ZIP_FRONTEND_ORIGINS ?? ''): boolean {
+  return !!origin && allowedOrigins(configured).has(origin);
+}
+
 export function zipCorsHeaders(origin: string | null, configured = process.env.ZIP_FRONTEND_ORIGINS ?? ''): Record<string, string> {
   const headers: Record<string, string> = { Vary: 'Origin' };
-  if (!origin || !allowedOrigins(configured).has(origin)) return headers;
-  headers['Access-Control-Allow-Origin'] = origin;
+  if (!isAllowedZipOrigin(origin, configured)) return headers;
+  headers['Access-Control-Allow-Origin'] = origin!;
   headers['Access-Control-Allow-Credentials'] = 'true';
   headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS';
   headers['Access-Control-Allow-Headers'] = 'Content-Type';
