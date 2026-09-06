@@ -32,21 +32,12 @@ export type WorkspaceViewer = {
   crewId?: string;
 };
 
-export type JobEvent = {
-  id: string;
-  label: string;
-  time: string;
-};
-
-export type JobMessage = {
-  id: string;
-  sender: "dispatcher" | "worker";
-  text: string;
-  time: string;
-};
+export type JobEvent = { id: string; label: string; time: string };
+export type JobMessage = { id: string; sender: "dispatcher" | "worker"; text: string; time: string };
 
 export type Job = {
   id: string;
+  zipDraftId?: string;
   assigneeId: string;
   task: string;
   location: string;
@@ -55,16 +46,13 @@ export type Job = {
   status: JobStatus;
   scheduleLabel: string;
   createdAt: string;
-  sourceText: string;
+  sourceText?: string;
   helperId?: string;
   events: JobEvent[];
   messages: JobMessage[];
 };
 
-export type JobDraft = Pick<
-  Job,
-  "task" | "location" | "requirements" | "priority" | "scheduleLabel" | "sourceText"
->;
+export type JobDraft = Pick<Job, "task" | "location" | "requirements" | "priority" | "scheduleLabel" | "sourceText">;
 
 export type MileageEntry = {
   id: string;

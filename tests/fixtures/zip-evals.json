@@ -1,0 +1,12 @@
+[
+  {"name":"complete floor job","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the lobby floor","expected":"ready"},
+  {"name":"missing location","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the floor","expected":"needs_clarification"},
+  {"name":"conflicting time","employeeId":"employee-demo","presetId":"floor-care","raw":"Do it at 2 PM and 4 PM","expected":"needs_clarification"},
+  {"name":"unauthorized job type","employeeId":"employee-demo","presetId":"exterior-cleaning","raw":"Pressure wash the wall","expected":"needs_clarification"},
+  {"name":"required safety signs","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the assigned lobby","expected":"ready"},
+  {"name":"employee detail preference","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the assigned floor","expected":"ready"},
+  {"name":"missing tools","employeeId":"employee-demo","presetId":"floor-care","raw":"Use the special machine to clean it","expected":"needs_clarification"},
+  {"name":"invented address trap","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the assigned area","expected":"temporarily_unavailable"},
+  {"name":"language preference","employeeId":"employee-demo","presetId":"general-field-service","raw":"Complete the assigned field task","expected":"ready"},
+  {"name":"provider timeout","employeeId":"employee-demo","presetId":"floor-care","raw":"Clean the assigned floor","expected":"temporarily_unavailable"}
+]
