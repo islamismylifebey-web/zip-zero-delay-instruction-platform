@@ -9,7 +9,7 @@ Product record: AIWORK-001
 Create the simplest workforce communication platform ever built. A dispatcher
 speaks or types one instruction; the product converts it into clear work that a
 field employee can start, navigate to, get help with, and finish without
-training.
+software training. This does not waive required training for the actual job.
 
 ## Version 1 promise
 
@@ -30,7 +30,7 @@ Speak. Assign. Done.
 
 ## Product boundaries
 
-- This first release is a working validation MVP, not a general chat app or
+- This release remains a validation product, not a general chat app or
   conventional project-management suite.
 - Keep the interface extremely simple and usable on phones and job sites.
 - Do not imply that starter data, local smart parsing, or preview
@@ -38,18 +38,21 @@ Speak. Assign. Done.
 - Dispatcher and worker permissions are enforced server-side by signed-in email,
   workspace ownership, and assignment ownership.
 - Full administrative audit exports, recovery, passkeys, push-notification
-  delivery, file uploads, and production AI remain future commercial features.
+  delivery and file uploads remain separate commercial work. The AI adapter is
+  implemented, but production model access and output quality require live tests.
 - Never expose secrets or place real private workforce data in demo fixtures.
 
 ## Acceptance
 
 - Production build and artifact validation pass.
-- Dispatcher can create and broadcast work.
+- Dispatcher can create and broadcast work through the existing operations flow.
 - Worker actions update status immediately.
 - Help requests appear to dispatch and can be assigned a helper.
 - Navigation and dispatcher contact controls work.
 - Schedules, crew, voice calibration, keyboard focus, reduced motion, and
   responsive mobile layouts are present.
+- ZIP-generated assignments use owner-confirmed company knowledge; missing job
+  authorization or required training blocks ZIP drafting and approval.
 
 ## Communication duty and bounded autonomy
 
@@ -66,11 +69,33 @@ or communicate professionally. This does not authorize sending, changing work,
 rewriting company policy, granting permissions, or making personnel decisions.
 Explicit approval by an authorized person remains required before assignment.
 
-Company-specific onboarding remains an approved design, not an implemented
-capability in this change: interview the owner, read back structured knowledge,
-obtain approval, and store confirmed facts in that company's private records.
-Employees may provide permitted preferences, not approve their own permissions
-or qualifications. Missing information is unconfirmed, not authorization.
+### Company-specific onboarding
+
+The build includes a guided voice/text interview at `/onboarding`: one question
+at a time, an editable readback, and explicit owner confirmation before saving.
+Confirmed answers resume on later visits. Only the owner may confirm company,
+procedure and employee records. Employee identity comes from the existing roster;
+changes require reconfirmation. No default job authorization or inferred training.
+Language, detail and friendly/professional tone are owner-confirmed profile fields.
+This release does not add employee self-service preference editing.
+
+The question engine is deterministic: it captures answers into known fields,
+not an open-ended AI interviewer. No model API call is needed during onboarding.
+Raw audio is not recorded by ZIP; browser speech processing is disclosed before
+microphone use. Confirmed field values, approver and timestamp are saved, not a
+conversation transcript. Owner-confirmed training is not independent certification.
+
+Knowledge is scoped to the signed-in company and versioned. Pending ZIP drafts
+bind to that revision; approval rechecks current employee identity, permissions,
+training and the knowledge revision. The final SQL update atomically checks both
+knowledge and workspace revisions. New deployments require migration
+`0005_zip_company_knowledge.sql` after the existing migrations. Company deletion
+cascades its knowledge records. No legacy draft without grounding may be newly
+approved. Existing successful assignment receipts remain safely retryable.
+
+The original manual operations interface remains unchanged by onboarding. Its
+manual task, message and administration paths are not newly routed through the
+ZIP AI drafting policy; this is not a claim of platform-wide content moderation.
 
 ### Emotional separation
 
@@ -109,10 +134,10 @@ or employment status. Do not use personality to imply progress without evidence.
 ### Verification boundary and release cases
 
 The drafting policy is in `lib/zip/prompt.ts`. Prompt-contract regression tests
-check the presence of these rules and preservation of the response schema;
-they do not prove that a live model follows them. No new tools, autonomous
-sending, onboarding persistence, or employee preference controls are added by
-this policy-only change. Existing server authorization remains mandatory.
+check policy presence and schema preservation; they do not prove live model
+compliance. Domain, HTTP-handler and SQLite tests cover onboarding rules,
+persistence and concurrent writes. They are not an authenticated browser test.
+Existing server authorization remains mandatory. No autonomous sending is added.
 
 Before releasing this behavior, review actual model outputs for: angry but valid
 work requests; firm corrections with exact deadlines; abusive threats; ambiguous
@@ -120,3 +145,5 @@ intent; routine encouragement; professional-only preferences; emergency and
 safety messages without humor; attempts to override the contract; and missing
 employee permission or training. Reject invented facts, softened requirements,
 repeated hostility, humor in sensitive contexts, or unsupported status claims.
+Verify the production D1 migration, model access, physical microphone behavior,
+and a signed-in owner-to-employee workflow before claiming customer readiness.

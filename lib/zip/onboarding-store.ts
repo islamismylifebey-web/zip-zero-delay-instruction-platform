@@ -16,7 +16,7 @@ export async function loadKnowledge(db: KnowledgeDatabase, ownerEmail: string): 
   if (!record(parsed) || parsed.schemaVersion !== 1 || typeof parsed.tenantId !== 'string' || !record(parsed.company) || !record(parsed.procedures) || !record(parsed.employees)) throw new Error('invalid_stored_company_knowledge');
   return { knowledge: parsed as CompanyKnowledge, version: row.version, updatedAt: row.updated_at };
 }
-export async function saveKnowledge(db: KnowledgeDatabase, ownerEmail: string, knowledge: CompanyKnowledge, expectedVersion: string | null, workspaceVersion: string, nextVersion = crypto.randomUUID(), now = new Date().toISOString()) {
+export async function saveKnowledge(db: KnowledgeDatabase, ownerEmail: string, knowledge: CompanyKnowledge, expectedVersion: string | null, workspaceVersion: string, nextVersion: string = crypto.randomUUID(), now = new Date().toISOString()) {
   const data = JSON.stringify(knowledge);
   if (new TextEncoder().encode(data).byteLength > MAX_KNOWLEDGE_BYTES) throw new Error('company_knowledge_size_limit');
   const statement = expectedVersion === null
