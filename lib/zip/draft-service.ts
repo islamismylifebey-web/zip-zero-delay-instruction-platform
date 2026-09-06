@@ -12,7 +12,7 @@ export function createZipDraftService(deps: DraftDeps) {
     if (!context.ok) { logger({ requestId, outcome: 'invalid_context', durationMs: now() - started, errorCode: context.code }); return { status: 'needs_clarification', clarifyingQuestion: 'The selected employee or job preset is not available for this assignment. Which approved employee and preset should I use?', fields: [context.code] }; }
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const providerValue = await deps.provider.generate(request.rawInstruction, context.context, controller.signal); const validated = validateZipModelResult(providerValue, context.context);
+      const providerValue = await deps.provider.generate(request.rawInstruction, context.context, controller.signal); const validated = validateZipModelResult(providerValue, context.context, request.rawInstruction);
       if (validated.status === 'invalid') { logger({ requestId, outcome: 'invalid_output', durationMs: now() - started, errorCode: validated.reasons.join(',') }); return { status: 'temporarily_unavailable', retryable: true, code: 'invalid_output' }; }
       if (validated.status === 'needs_clarification') { logger({ requestId, outcome: 'needs_clarification', durationMs: now() - started }); return { status: 'needs_clarification', clarifyingQuestion: validated.clarifyingQuestion, fields: [...validated.missingFields, ...validated.conflictingFields] }; }
       logger({ requestId, outcome: 'ready', durationMs: now() - started }); return { status: 'ready', draftId: randomId(), professionalAssignment: validated.professionalAssignment, checklist: validated.checklist };
