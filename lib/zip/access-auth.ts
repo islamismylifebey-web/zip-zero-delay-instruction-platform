@@ -9,6 +9,11 @@ function decodeBase64Url(value: string): Uint8Array {
   if (typeof Buffer !== 'undefined') return Uint8Array.from(Buffer.from(base64, 'base64'));
   const binary = atob(base64); return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
+function concreteBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
 function decodeJson<T>(value: string): T {
   const text = new TextDecoder().decode(decodeBase64Url(value));
   return JSON.parse(text) as T;
@@ -47,8 +52,8 @@ export async function verifyCloudflareAccessJwt(token: string, options: AccessVe
   const jwk = jwks.keys?.find((key) => key.kid === header.kid && (!key.alg || key.alg === 'RS256'));
   if (!jwk) throw new Error('access_key_not_found');
   const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-  const signed = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
-  const signature = decodeBase64Url(parts[2]);
+  const signed = concreteBuffer(new TextEncoder().encode(`${parts[0]}.${parts[1]}`));
+  const signature = concreteBuffer(decodeBase64Url(parts[2]));
   const verified = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, signature, signed);
   if (!verified) throw new Error('invalid_access_signature');
   return validateAccessClaims(claims, { issuer, audience: options.audience, now: options.now });
