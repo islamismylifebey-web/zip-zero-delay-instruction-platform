@@ -7,6 +7,7 @@
     {"idx":2,"version":"6","when":1784367095259,"tag":"0002_famous_gravity","breakpoints":true},
     {"idx":3,"version":"6","when":1784367187316,"tag":"0003_acoustic_gorgon","breakpoints":true},
     {"idx":4,"version":"6","when":1788685200000,"tag":"0004_zip_pending_drafts","breakpoints":true},
-    {"idx":5,"version":"6","when":1788696000000,"tag":"0005_zip_company_knowledge","breakpoints":true}
+    {"idx":5,"version":"6","when":1788696000000,"tag":"0005_zip_company_knowledge","breakpoints":true},
+    {"idx":6,"version":"6","when":1788703200000,"tag":"0006_zip_employee_feedback","breakpoints":true}
   ]
 }
