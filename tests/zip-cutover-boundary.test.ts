@@ -66,4 +66,5 @@ test('Vercel typechecking recognizes the Cloudflare worker module shim', async (
   const { readFile } = await import('node:fs/promises');
   const source = await readFile(new URL('../types/cloudflare-workers.d.ts', import.meta.url), 'utf8');
   assert.match(source, /declare module "cloudflare:workers"/);
+  assert.match(source, /AnyD1Database/);
 });
