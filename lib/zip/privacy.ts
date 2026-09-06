@@ -1,0 +1,1 @@
+export function stripRawInstructionFields<T extends { jobs: Array<Record<string, unknown>> }>(workspace: T): T { return { ...workspace, jobs: workspace.jobs.map((job) => { const { sourceText: _discarded, rawInstruction: _rawInstruction, ...safe } = job; return safe; }) } as T; }
