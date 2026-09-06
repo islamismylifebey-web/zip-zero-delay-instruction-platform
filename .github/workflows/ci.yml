@@ -11,7 +11,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,3 +23,7 @@ jobs:
       - run: npm test
       - run: node scripts/typecheck.mjs
       - run: npm run lint
+      - name: Verify Vercel frontend-only build
+        env:
+          NEXT_PUBLIC_ZIP_API_ORIGIN: https://zip-api.example.com
+        run: npm run build:vercel

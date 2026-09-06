@@ -1,3 +1,5 @@
+import { isAllowedZipOrigin } from './cors.ts';
+
 export class ZipRequestError extends Error {
   status: number;
   constructor(message: string, status: number) { super(message); this.name = 'ZipRequestError'; this.status = status; }
@@ -6,7 +8,10 @@ export class ZipRequestError extends Error {
 /** Bound the streamed body before decoding it. Never include instruction text in errors. */
 export async function readZipJson(request: Request, maxBytes = 16_384): Promise<Record<string, unknown>> {
   const origin = request.headers.get('origin');
-  if ((origin !== null && origin !== new URL(request.url).origin) || request.headers.get('sec-fetch-site') === 'cross-site') throw new ZipRequestError('Same-origin request required', 403);
+  const requestOrigin = new URL(request.url).origin;
+  const sameOrigin = origin === null || origin === requestOrigin;
+  const approvedCrossOrigin = !sameOrigin && isAllowedZipOrigin(origin);
+  if ((!sameOrigin && !approvedCrossOrigin) || (request.headers.get('sec-fetch-site') === 'cross-site' && !approvedCrossOrigin)) throw new ZipRequestError('Approved application origin required', 403);
   if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') throw new ZipRequestError('JSON request required', 415);
   if (Number(request.headers.get('content-length')) > maxBytes) throw new ZipRequestError('Request body is too large', 413);
   const reader = request.body?.getReader();

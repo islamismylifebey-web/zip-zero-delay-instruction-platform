@@ -7,6 +7,17 @@ import { getWorkspace, parseWorkspace, resolveAccess } from '@/lib/workspace-ser
 export const dynamic = 'force-dynamic';
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
 
+export async function GET() {
+  const user = await getChatGPTUser();
+  if (!user) return json({ error: 'Sign in required.' }, 401);
+  const access = await resolveAccess(user.email, user.displayName);
+  if (access.role !== 'employee' || !access.crewId) return json({ error: 'Employee assignment access required.' }, 403);
+  const row = await getWorkspace(access.ownerEmail); if (!row) return json({ error: 'Workspace not found.' }, 404);
+  const workspace = parseWorkspace(row.data);
+  const jobs = workspace.jobs.filter((job) => !!job.zipDraftId && (job.assigneeId === access.crewId || job.helperId === access.crewId)).map((job) => ({ id: job.id, task: job.task, status: job.status }));
+  return json({ jobs });
+}
+
 export async function POST(request: Request) {
   const user = await getChatGPTUser();
   if (!user) return json({ error: 'Sign in required.' }, 401);

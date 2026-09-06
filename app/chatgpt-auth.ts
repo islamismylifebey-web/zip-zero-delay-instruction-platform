@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { verifyCloudflareAccessJwt } from "@/lib/zip/access-auth.ts";
 
 export type ChatGPTUser = {
   displayName: string;
@@ -9,8 +10,7 @@ export type ChatGPTUser = {
 
 const USER_EMAIL_HEADER = "oai-authenticated-user-email";
 const USER_FULL_NAME_HEADER = "oai-authenticated-user-full-name";
-const USER_FULL_NAME_ENCODING_HEADER =
-  "oai-authenticated-user-full-name-encoding";
+const USER_FULL_NAME_ENCODING_HEADER = "oai-authenticated-user-full-name-encoding";
 const PERCENT_ENCODED_UTF8 = "percent-encoded-utf-8";
 const SIGN_IN_PATH = "/signin-with-chatgpt";
 const SIGN_OUT_PATH = "/signout-with-chatgpt";
@@ -18,29 +18,28 @@ const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
   const requestHeaders = await headers();
-  const email = requestHeaders.get(USER_EMAIL_HEADER);
-  if (!email) return null;
+  const sitesEmail = requestHeaders.get(USER_EMAIL_HEADER);
+  if (sitesEmail) {
+    const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
+    const fullName = encodedFullName && requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER) === PERCENT_ENCODED_UTF8 ? safeDecodeURIComponent(encodedFullName) : null;
+    return { displayName: fullName ?? sitesEmail, email: sitesEmail, fullName };
+  }
 
-  const encodedFullName = requestHeaders.get(USER_FULL_NAME_HEADER);
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get(USER_FULL_NAME_ENCODING_HEADER) === PERCENT_ENCODED_UTF8
-      ? safeDecodeURIComponent(encodedFullName)
-      : null;
-
-  return {
-    displayName: fullName ?? email,
-    email,
-    fullName,
-  };
+  const accessJwt = requestHeaders.get("cf-access-jwt-assertion");
+  const issuer = process.env.CLOUDFLARE_ACCESS_TEAM_DOMAIN?.trim() ?? "";
+  const audience = process.env.CLOUDFLARE_ACCESS_AUD?.trim() ?? "";
+  if (!accessJwt || !issuer || !audience) return null;
+  try {
+    const identity = await verifyCloudflareAccessJwt(accessJwt, { issuer, audience, fetch });
+    return { email: identity.email, displayName: identity.displayName, fullName: identity.displayName === identity.email ? null : identity.displayName };
+  } catch {
+    return null;
+  }
 }
 
-export async function requireChatGPTUser(
-  returnTo: string,
-): Promise<ChatGPTUser> {
+export async function requireChatGPTUser(returnTo: string): Promise<ChatGPTUser> {
   const user = await getChatGPTUser();
   if (user) return user;
-
   redirect(chatGPTSignInPath(returnTo));
 }
 
@@ -56,31 +55,17 @@ export function chatGPTSignOutPath(returnTo = "/"): string {
 
 function safeRelativeReturnPath(value: string): string {
   if (!value.startsWith("/") || value.startsWith("//")) return "/";
-
   let url: URL;
-  try {
-    url = new URL(value, "https://app.local");
-  } catch {
-    return "/";
-  }
+  try { url = new URL(value, "https://app.local"); } catch { return "/"; }
   if (url.origin !== "https://app.local") return "/";
   if (isReservedAuthPath(url.pathname)) return "/";
-
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
 function isReservedAuthPath(pathname: string): boolean {
-  return (
-    pathname === SIGN_IN_PATH ||
-    pathname === SIGN_OUT_PATH ||
-    pathname === CALLBACK_PATH
-  );
+  return pathname === SIGN_IN_PATH || pathname === SIGN_OUT_PATH || pathname === CALLBACK_PATH;
 }
 
 function safeDecodeURIComponent(value: string): string | null {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return null;
-  }
+  try { return decodeURIComponent(value); } catch { return null; }
 }

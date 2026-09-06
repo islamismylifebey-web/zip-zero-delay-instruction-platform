@@ -3,6 +3,7 @@ import { requireChatGPTUser } from './chatgpt-auth';
 import WorkforceApp from './workforce-app';
 import ZipChat from './zip-chat';
 import ZipOnboarding, { ZipCompanyWelcome } from './onboarding/zip-onboarding';
+import CutoverHome from './cutover-home';
 import { getD1 } from '@/db';
 import { getWorkspace, parseWorkspace, resolveAccess } from '@/lib/workspace-server';
 import { compileKnowledge, completedProcedures, missingCompanyFields } from '@/lib/zip/onboarding.ts';
@@ -10,6 +11,7 @@ import { loadKnowledge } from '@/lib/zip/onboarding-store.ts';
 
 export const dynamic = 'force-dynamic';
 export default async function Home() {
+  if (process.env.VERCEL === '1' || process.env.ZIP_FRONTEND_ONLY === '1') return <CutoverHome />;
   const user = await requireChatGPTUser('/');
   const access = await resolveAccess(user.email, user.displayName);
   if (access.role === 'employee') return <><WorkforceApp ownerName={user.displayName} /><aside style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 20, background: '#fff', border: '1px solid #d7dce5', borderRadius: 12, padding: '10px 12px', boxShadow: '0 8px 24px rgba(15,23,42,.12)' }}><Link href="/feedback">Tell ZIP what was unclear</Link></aside></>;
